@@ -1,0 +1,54 @@
+body {
+    background-color: #F8F9FA;
+    font-family: 'Roboto', sans-serif;
+}
+
+
+/* header */
+
+.navbar>.container-fluid {
+    justify-content: center;
+}
+
+.navbar .bi {
+    font-size: 30px;
+}
+
+.navbar li.nav-item .nav-link {
+    color: #212529;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.navbar li .nav-link.active {
+    background-color: #DCDCDE;
+    border-radius: 0 0 5px 5px;
+}
+
+
+/* main */
+
+main label.upload {
+    height: 300px;
+    border: 2px dashed #212529;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+main input#upload-file {
+    visibility: hidden;
+}
+
+.upload .bi {
+    font-size: 55px;
+}
+
+.image {
+    width: 300px;
+    height: 300px;
+}

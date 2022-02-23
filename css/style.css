@@ -26,6 +26,29 @@ body {
     border-radius: 0 0 5px 5px;
 }
 
+.navbar-tab .bi {
+    font-size: 15px;
+}
+
+input[type='range'] {
+    background: linear-gradient(to right, #212529 0%, #212529 1%, #fff 1%, #fff 100%);
+    border: solid 1px #212529;
+    border-radius: 8px;
+    height: 7px;
+    width: 100%;
+    outline: none;
+    transition: background 450ms ease-in;
+    -webkit-appearance: none;
+}
+
+.tab-item {
+    display: none;
+}
+
+.tab-item.active {
+    display: flex;
+}
+
 
 /* main */
 
@@ -51,4 +74,8 @@ main input#upload-file {
 .image {
     width: 300px;
     height: 300px;
+}
+
+#rotate-right .bi::before {
+    transform: rotateY(180deg);
 }

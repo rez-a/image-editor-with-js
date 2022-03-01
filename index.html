@@ -39,8 +39,6 @@
                         <li class="tab-item justify-content-center animate__animated active animate__fadeInDown" data-tab="rotate">
                             <button onclick="rotate('right')" id="rotate-right" class="btn btn-outline-dark me-3"><i class="bi bi-symmetry-vertical"></i> rotate right 90deg</button>
                             <button onclick="rotate('left')" id="rotate-left" class="btn btn-outline-dark me-3"><i class="bi bi-symmetry-vertical"></i> rotate left 90deg</button>
-                            <button onclick="rotate('vertical')" id="vertical" class="btn btn-outline-dark me-3"><i class="bi bi-symmetry-horizontal"></i> flip vertical</button>
-                            <button onclick="rotate('horizontal')" id="horizontal" class="btn btn-outline-dark"><i class="bi bi-symmetry-vertical"></i> flip horizontal</button>
                         </li>
                         <li class="tab-item row justify-content-center animate__animated animate__fadeInDown" data-tab="filter">
                             <div class="col-3 text-center mb-3">
@@ -61,7 +59,7 @@
                             </div>
                             <div class="col-3 text-center mb-3">
                                 <label for="opacity" class="form-label">opacity</label>
-                                <input oninput="filter('opacity' , event)" type="range" id="opacity" min="0" max="1" step="0.01" value="0.01">
+                                <input oninput="filter('opacity' , event)" type="range" id="opacity" min="0" max="1" step="0.01" value="1">
                             </div>
                         </li>
                         <li class="tab-item row justify-content-center  animate__animated animate__fadeInDown" data-tab="color">
@@ -101,11 +99,11 @@
                 <input type="file" id="upload-file" accept="image/png, image/jpeg , image/jpg">
             </div>
             <div class="row justify-content-center download mt-5 d-none">
-                <div class="col-6 text-center">
-                    <img alt="image" class="image">
+                <div class="col-6 text-center image-container">
+                    <canvas class="image" width="300px" height="300px"></canvas>
                 </div>
                 <div class="col-12 mt-3 d-flex justify-content-center">
-                    <button class="btn btn-outline-dark me-3">Download<i class="bi bi-cloud-download ms-2"></i></button>
+                    <button onclick="download()" class="btn btn-outline-dark me-3">Download<i class="bi bi-cloud-download ms-2"></i></button>
                     <button class="btn btn-outline-dark">Cancel</button>
                 </div>
             </div>
@@ -117,6 +115,7 @@
 
     <!--  Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.4/html2canvas.min.js"></script>
     <script src="./script.js"></script>
 
 </body>

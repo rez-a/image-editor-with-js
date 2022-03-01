@@ -5,9 +5,10 @@ let elements = document.querySelector('.navbar');
 let uploadState = document.querySelector('.row.upload');
 let downloadState = document.querySelector('.row.download');
 let navs = document.querySelectorAll('.nav-item');
+let canvasContainer = document.querySelector('.image-container');
+let canvas = document.querySelector('.image');
+let ctx = canvas.getContext('2d');
 let deg = 0,
-    vertical = 0,
-    horizontal = 0,
     blurValue = 0,
     brightnessValue = 1,
     hueRotateValue = 1,
@@ -16,16 +17,19 @@ let deg = 0,
     grayscaleValue = 1,
     sepiaValue = 1,
     saturateValue = 1,
-    opacityValue;
+    opacityValue = 1,
+    image;
 
 uploadInput.addEventListener('input', async function(e) {
     let file = this.files[0];
     showImage(file);
 })
 document.querySelectorAll("input[type='range']").forEach(input => {
+    let value = (input.value - input.min) / (input.max - input.min) * 100;
+    input.style.background = 'linear-gradient(to right, #212529 0%, #212529 ' + value + '%, #fff ' + value + '%, white 100%)';
     input.addEventListener('input', function() {
-        let value = (this.value - this.min) / (this.max - this.min) * 100
-        this.style.background = 'linear-gradient(to right, #212529 0%, #212529 ' + value + '%, #fff ' + value + '%, white 100%)'
+        value = (this.value - this.min) / (this.max - this.min) * 100;
+        this.style.background = 'linear-gradient(to right, #212529 0%, #212529 ' + value + '%, #fff ' + value + '%, white 100%)';
     })
 })
 dropArea.addEventListener('dragover', function(e) {
@@ -55,54 +59,50 @@ navs.forEach(nav => {
     })
 })
 
+function download() {
+    let canvas = document.querySelector('canvas');
+    let a = document.createElement('a');
+    a.href = canvas.toDataURL();
+    a.download = 'image-editor.png';
+    a.click();
+}
+
 function showImage(file) {
     let reader = new FileReader();
-    let image = document.querySelector('.image');
     uploadState.classList.add('d-none');
     elements.classList.remove('d-none');
     downloadState.classList.remove('d-none');
-
     reader.onload = function() {
+
+        image = document.createElement('img');
         image.src = reader.result;
-        localStorage.setItem('image', JSON.stringify(reader.result))
+        image.width = canvas.width;
+        image.height = canvas.height;
+        localStorage.setItem('image', JSON.stringify(reader.result));
+        image.onload = function() {
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
+        }
     }
     if (file) {
         reader.readAsDataURL(file)
     }
+
 }
 
-function rotate(rotateType) {
-    let image = document.querySelector('.image');
-    switch (rotateType) {
-        case 'right':
-            deg += 90;
-            image.style.transform = `rotate(${deg}deg)`;
-            break;
-        case 'left':
-            deg -= 90;
-            image.style.transform = `rotate(${deg}deg)`;
-            break;
-        case 'vertical':
-            vertical += 180;
-            image.style.transform = `rotateZ(${vertical}deg)`;
-            break;
-        case 'horizontal':
-            horizontal += 180;
-            image.style.transform = `rotateY(${horizontal}deg)`;
-            break;
-        default:
-            break;
-    }
 
+function rotate(rotateType) {
+    deg === 360 || deg === -360 ? deg = 0 : true;
+    rotateType === 'right' ? deg += 90 : true;
+    rotateType === 'left' ? deg -= 90 : true;
+    createNewCanvas();
 }
 
 function filter(filterType, event) {
+    console.log(deg)
     let value = event.target.value;
-    let image = document.querySelector('.image');
     switch (filterType) {
         case 'blur':
             blurValue = value;
-            console.log(value)
             break;
         case 'brightness':
             brightnessValue = value;
@@ -126,10 +126,32 @@ function filter(filterType, event) {
             saturateValue = value;
             break;
         case 'opacity':
-            image.style.opacity = value;
+            opacityValue = value;
             break;
         default:
             break;
     }
-    image.style.filter = `blur(${blurValue}px) brightness(${brightnessValue}) hue-rotate(${hueRotateValue}deg) invert(${invertValue}%) contrast(${contrastValue}) grayscale(${grayscaleValue}%) sepia(${sepiaValue}%) saturate(${saturateValue})`;
+    createNewCanvas();
+}
+
+function createNewCanvas() {
+    document.querySelector('.image').remove();
+    let canvasRotate = document.createElement('canvas');
+    canvasRotate.classList.add('image');
+    canvasRotate.setAttribute('width', '300px');
+    canvasRotate.setAttribute('height', '300px');
+    image = document.createElement('img');
+    image.width = '300px';
+    image.height = '300px';
+    image.src = JSON.parse(localStorage.getItem('image'));
+    let ctx = canvasRotate.getContext('2d');
+    canvasContainer.appendChild(canvasRotate);
+    deg === 90 || deg === -270 ? ctx.translate(canvasRotate.width, 0) : true;
+    deg === 180 || deg === -180 ? ctx.translate(canvasRotate.width, canvasRotate.height) : true;
+    deg === 270 || deg === -90 ? ctx.translate(0, canvasRotate.height) : true;
+    deg === 360 || deg === -360 ? ctx.translate(0, 0) : true;
+    ctx.rotate(deg * Math.PI / 180);
+    ctx.globalAlpha = opacityValue;
+    ctx.filter = `blur(${blurValue}px) brightness(${brightnessValue}) hue-rotate(${hueRotateValue}deg) invert(${invertValue}%) contrast(${contrastValue}) grayscale(${grayscaleValue}%) sepia(${sepiaValue}%) saturate(${saturateValue})`;
+    ctx.drawImage(image, 0, 0, canvasRotate.width, canvasRotate.height);
 }

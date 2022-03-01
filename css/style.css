@@ -31,7 +31,7 @@ body {
 }
 
 input[type='range'] {
-    background: linear-gradient(to right, #212529 0%, #212529 1%, #fff 1%, #fff 100%);
+    /* background: linear-gradient(to right, #212529 0%, #212529 1%, #fff 1%, #fff 100%); */
     border: solid 1px #212529;
     border-radius: 8px;
     height: 7px;

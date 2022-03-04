@@ -1,14 +1,14 @@
-let uploadInput = document.querySelector('#upload-file');
-let dropArea = document.querySelector('label.upload');
-let helpText = document.querySelector('.text');
-let elements = document.querySelector('.navbar');
-let uploadState = document.querySelector('.row.upload');
-let downloadState = document.querySelector('.row.download');
-let navs = document.querySelectorAll('.nav-item');
-let canvasContainer = document.querySelector('.image-container');
-let canvas = document.querySelector('.image');
-let ctx = canvas.getContext('2d');
-let deg = 0,
+let uploadInput = document.querySelector('#upload-file'),
+    dropArea = document.querySelector('label.upload'),
+    helpText = document.querySelector('.text'),
+    elements = document.querySelector('.navbar'),
+    uploadState = document.querySelector('.row.upload'),
+    downloadState = document.querySelector('.row.download'),
+    navs = document.querySelectorAll('.nav-item'),
+    canvasContainer = document.querySelector('.image-container'),
+    canvas = document.querySelector('.image'),
+    ctx = canvas.getContext('2d'),
+    deg = 0,
     blurValue = 0,
     brightnessValue = 1,
     hueRotateValue = 1,
@@ -18,11 +18,57 @@ let deg = 0,
     sepiaValue = 1,
     saturateValue = 1,
     opacityValue = 1,
-    image;
+    image, state, file, imageFilter;
 
-uploadInput.addEventListener('input', async function(e) {
-    let file = this.files[0];
-    showImage(file);
+function load() {
+    if (localStorage.getItem('state') === null) {
+        state = 'upload';
+        localStorage.setItem('state', JSON.stringify(state));
+    } else {
+        state = JSON.parse(localStorage.getItem('state'));
+        file = JSON.parse(localStorage.getItem('file'));
+        imageFilter = JSON.parse(localStorage.getItem('filter'));
+        opacityValue = JSON.parse(localStorage.getItem('opacity'));
+    }
+    showState(state, file, imageFilter, opacityValue);
+}
+
+function showState(state, imageURL, imageFilter, opacityValue) {
+    if (state === 'upload') {
+        uploadState.classList.remove('d-none');
+        elements.classList.add('d-none');
+        downloadState.classList.add('d-none');
+    } else {
+        showImage(imageURL, imageFilter, opacityValue);
+    }
+}
+
+function changeState(imageURL) {
+    state = JSON.parse(localStorage.getItem('state'));
+    if (state === 'upload') {
+        state = 'download'
+    } else {
+        state = 'upload';
+        localStorage.clear();
+        opacityValue = 1;
+        localStorage.setItem('opacity', JSON.stringify(opacityValue));
+        window.location.reload();
+    }
+
+    localStorage.setItem('state', JSON.stringify(state));
+    showState(state, imageURL, opacityValue);
+}
+
+uploadInput.addEventListener('input', function(e) {
+    file = this.files[0];
+    if (file) {
+        let reader = new FileReader();
+        reader.onload = function() {
+            localStorage.setItem('file', JSON.stringify(reader.result));
+            changeState(reader.result);
+        }
+        reader.readAsDataURL(file);
+    }
 })
 document.querySelectorAll("input[type='range']").forEach(input => {
     let value = (input.value - input.min) / (input.max - input.min) * 100;
@@ -44,9 +90,15 @@ dropArea.addEventListener('dragleave', function(e) {
 })
 dropArea.addEventListener('drop', function(e) {
     e.preventDefault()
-    let file = e.dataTransfer.files[0];
-
-    showImage(file);
+    file = e.dataTransfer.files[0];
+    if (file) {
+        let reader = new FileReader();
+        reader.onload = function() {
+            localStorage.setItem('file', JSON.stringify(reader.result));
+            changeState(reader.result);
+        }
+        reader.readAsDataURL(file);
+    }
 })
 navs.forEach(nav => {
     nav.addEventListener('click', function(e) {
@@ -67,26 +119,25 @@ function download() {
     a.click();
 }
 
-function showImage(file) {
-    let reader = new FileReader();
+function showImage(imageURL, imageFilter, opacityValue) {
     uploadState.classList.add('d-none');
     elements.classList.remove('d-none');
     downloadState.classList.remove('d-none');
-    reader.onload = function() {
-
-        image = document.createElement('img');
-        image.src = reader.result;
-        image.width = canvas.width;
-        image.height = canvas.height;
-        localStorage.setItem('image', JSON.stringify(reader.result));
-        image.onload = function() {
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
-        }
+    image = document.createElement('img');
+    image.src = imageURL;
+    image.width = canvas.width;
+    image.height = canvas.height;
+    deg = JSON.parse(localStorage.getItem('deg'));
+    deg === 90 || deg === -270 ? ctx.translate(canvas.width, 0) : true;
+    deg === 180 || deg === -180 ? ctx.translate(canvas.width, canvas.height) : true;
+    deg === 270 || deg === -90 ? ctx.translate(0, canvas.height) : true;
+    deg === 360 || deg === -360 ? ctx.translate(0, 0) : true;
+    ctx.rotate(deg * Math.PI / 180);
+    ctx.globalAlpha = opacityValue;
+    ctx.filter = imageFilter;
+    image.onload = function() {
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
     }
-    if (file) {
-        reader.readAsDataURL(file)
-    }
-
 }
 
 
@@ -94,6 +145,7 @@ function rotate(rotateType) {
     deg === 360 || deg === -360 ? deg = 0 : true;
     rotateType === 'right' ? deg += 90 : true;
     rotateType === 'left' ? deg -= 90 : true;
+    localStorage.setItem('deg', JSON.stringify(deg))
     createNewCanvas();
 }
 
@@ -143,7 +195,7 @@ function createNewCanvas() {
     image = document.createElement('img');
     image.width = '300px';
     image.height = '300px';
-    image.src = JSON.parse(localStorage.getItem('image'));
+    image.src = JSON.parse(localStorage.getItem('file'));
     let ctx = canvasRotate.getContext('2d');
     canvasContainer.appendChild(canvasRotate);
     deg === 90 || deg === -270 ? ctx.translate(canvasRotate.width, 0) : true;
@@ -152,6 +204,9 @@ function createNewCanvas() {
     deg === 360 || deg === -360 ? ctx.translate(0, 0) : true;
     ctx.rotate(deg * Math.PI / 180);
     ctx.globalAlpha = opacityValue;
-    ctx.filter = `blur(${blurValue}px) brightness(${brightnessValue}) hue-rotate(${hueRotateValue}deg) invert(${invertValue}%) contrast(${contrastValue}) grayscale(${grayscaleValue}%) sepia(${sepiaValue}%) saturate(${saturateValue})`;
+    imageFilter = `blur(${blurValue}px) brightness(${brightnessValue}) hue-rotate(${hueRotateValue}deg) invert(${invertValue}%) contrast(${contrastValue}) grayscale(${grayscaleValue}%) sepia(${sepiaValue}%) saturate(${saturateValue})`;
+    ctx.filter = imageFilter;
+    localStorage.setItem('filter', JSON.stringify(imageFilter));
+    localStorage.setItem('opacity', JSON.stringify(opacityValue));
     ctx.drawImage(image, 0, 0, canvasRotate.width, canvasRotate.height);
 }

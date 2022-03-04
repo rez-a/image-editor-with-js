@@ -15,7 +15,7 @@
     <title>image editor</title>
 </head>
 
-<body>
+<body onload="load()">
 
     <header>
         <nav class="navbar navbar-expand-md navbar-light bg-light pt-0 d-none">
@@ -104,7 +104,7 @@
                 </div>
                 <div class="col-12 mt-3 d-flex justify-content-center">
                     <button onclick="download()" class="btn btn-outline-dark me-3">Download<i class="bi bi-cloud-download ms-2"></i></button>
-                    <button class="btn btn-outline-dark">Cancel</button>
+                    <button onclick="changeState()" class="btn btn-outline-dark">End of editing</button>
                 </div>
             </div>
         </div>

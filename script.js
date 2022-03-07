@@ -7,6 +7,7 @@ let uploadInput = document.querySelector('#upload-file'),
     navs = document.querySelectorAll('.nav-item'),
     canvasContainer = document.querySelector('.image-container'),
     canvas = document.querySelector('.image'),
+    changeTheme = document.querySelector('#switch-theme'),
     ctx = canvas.getContext('2d'),
     deg = 0,
     blurValue = 0,
@@ -18,19 +19,23 @@ let uploadInput = document.querySelector('#upload-file'),
     sepiaValue = 1,
     saturateValue = 1,
     opacityValue = 1,
-    image, state, file, imageFilter;
+    image, state, file, imageFilter, theme;
 
 function load() {
     if (localStorage.getItem('state') === null) {
         state = 'upload';
+        theme = 'light';
         localStorage.setItem('state', JSON.stringify(state));
+        localStorage.setItem('theme', JSON.stringify(theme));
     } else {
         state = JSON.parse(localStorage.getItem('state'));
         file = JSON.parse(localStorage.getItem('file'));
         imageFilter = JSON.parse(localStorage.getItem('filter'));
         opacityValue = JSON.parse(localStorage.getItem('opacity'));
+        theme = JSON.parse(localStorage.getItem('theme'))
     }
     showState(state, file, imageFilter, opacityValue);
+    switchTheme(theme);
 }
 
 function showState(state, imageURL, imageFilter, opacityValue) {
@@ -58,7 +63,11 @@ function changeState(imageURL) {
     localStorage.setItem('state', JSON.stringify(state));
     showState(state, imageURL, opacityValue);
 }
-
+changeTheme.addEventListener('input', function(event) {
+    this.checked ? theme = 'dark' : theme = 'light';
+    localStorage.setItem('theme', JSON.stringify(theme));
+    switchTheme(theme);
+})
 uploadInput.addEventListener('input', function(e) {
     file = this.files[0];
     if (file) {
@@ -209,4 +218,15 @@ function createNewCanvas() {
     localStorage.setItem('filter', JSON.stringify(imageFilter));
     localStorage.setItem('opacity', JSON.stringify(opacityValue));
     ctx.drawImage(image, 0, 0, canvasRotate.width, canvasRotate.height);
+}
+
+function switchTheme(theme) {
+    if (theme === 'dark') {
+        document.querySelector('body').classList.add('dark');
+        changeTheme.checked = true;
+
+    } else {
+        document.querySelector('body').classList.remove('dark');
+        changeTheme.checked = false;
+    }
 }
